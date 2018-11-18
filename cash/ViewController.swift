@@ -44,7 +44,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         if(takePhoto) {
             takePhoto = false
             guard let pixelBuffer: CVPixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-            guard let model = try? VNCoreMLModel(for: SqueezeNet().model) else { return }
+            guard let model = try? VNCoreMLModel(for: Cash().model) else { return }
             let request = VNCoreMLRequest(model: model) {
                 (finishedReq, error) in
                 
@@ -53,8 +53,9 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
                 guard let firstObservation = results.first else { return }
                 
                 DispatchQueue.main.async {
-                    self.infoLabel.text = firstObservation.identifier
-                    UIAccessibility.post(notification: UIAccessibility.Notification.announcement, argument: firstObservation.identifier)
+                    let resultString = "Detected \(firstObservation.identifier.firstUppercased) Rupees"
+                    self.infoLabel.text = resultString
+                    UIAccessibility.post(notification: UIAccessibility.Notification.announcement, argument: resultString)
                 }
             }
             try? VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:]).perform([request])
@@ -71,3 +72,13 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     }
 }
 
+extension StringProtocol {
+    var firstUppercased: String {
+        guard let first = first else { return "" }
+        return String(first).uppercased() + dropFirst()
+    }
+    var firstCapitalized: String {
+        guard let first = first else { return "" }
+        return String(first).capitalized + dropFirst()
+    }
+}
